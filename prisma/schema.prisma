@@ -1,0 +1,115 @@
+generator client {
+  provider        = "prisma-client-js"
+  output = "../generated/prisma"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [postgis]
+}
+
+enum Role {
+  OWNER
+  VET
+}
+
+enum UrgencyLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum AppointmentStatus {
+  REQUESTED
+  ACCEPTED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+
+  ownerProfile PetOwnerProfile?
+  vetProfile   VetProfile?
+}
+
+model PetOwnerProfile {
+  id       String  @id @default(uuid())
+  userId   String  @unique
+  user     User    @relation(fields: [userId], references: [id])
+  fullName String
+  phone    String?
+  lat      Float?
+  lng      Float?
+
+  pets     Pet[]
+}
+
+model VetProfile {
+  id              String  @id @default(uuid())
+  userId          String  @unique
+  user            User    @relation(fields: [userId], references: [id])
+  fullName        String
+  specialty       String
+  serviceRadiusKm Int     @default(5)
+  avgRating       Float   @default(0)
+  isActive        Boolean @default(true)
+
+  appointments    Appointment[]
+}
+
+model Pet {
+  id             String    @id @default(uuid())
+  ownerProfileId String
+  ownerProfile   PetOwnerProfile @relation(fields: [ownerProfileId], references: [id])
+  name           String
+  species        String
+  breed          String?
+  birthDate      DateTime?
+
+  triageSessions TriageSession[]
+  appointments   Appointment[]
+}
+
+model TriageSession {
+  id           String       @id @default(uuid())
+  petId        String
+  pet          Pet          @relation(fields: [petId], references: [id])
+  messages     Json
+  urgencyLevel UrgencyLevel
+  summary      String?
+  createdAt    DateTime     @default(now())
+
+  appointment  Appointment?
+}
+
+model Appointment {
+  id              String            @id @default(uuid())
+  petId           String
+  pet             Pet               @relation(fields: [petId], references: [id])
+  vetProfileId    String
+  vetProfile      VetProfile        @relation(fields: [vetProfileId], references: [id])
+  triageSessionId String?           @unique
+  triageSession   TriageSession?    @relation(fields: [triageSessionId], references: [id])
+  status          AppointmentStatus @default(REQUESTED)
+  scheduledAt     DateTime?
+  ratingStars     Int?
+  ratingComment   String?
+  createdAt       DateTime          @default(now())
+
+  @@index([vetProfileId])
+  @@index([petId])
+}
+
+model spatial_ref_sys {
+  srid      Int     @id
+  auth_name String? @db.VarChar(256)
+  auth_srid Int?
+  srtext    String? @db.VarChar(2048)
+  proj4text String? @db.VarChar(2048)
+}

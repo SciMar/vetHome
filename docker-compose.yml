@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: vethome-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: vethome
+      POSTGRES_PASSWORD: vethome_dev
+      POSTGRES_DB: vethome
+    ports:
+      - "5432:5432"
+    volumes:
+      - vethome_pgdata:/var/lib/postgresql/data
+
+volumes:
+  vethome_pgdata:

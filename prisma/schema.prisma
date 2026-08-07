@@ -1,115 +1,195 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
-  provider        = "prisma-client-js"
-  output = "../generated/prisma"
-  previewFeatures = ["postgresqlExtensions"]
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+generator erd {
+  provider = "prisma-erd-generator"
+  output   = "./erd.svg"
 }
 
 datasource db {
-  provider   = "postgresql"
-  extensions = [postgis]
+  provider = "postgresql"
 }
 
-enum Role {
-  OWNER
-  VET
+// ============================================
+// ENUMS
+// ============================================
+
+enum UserRole {
+  USER
+  VETERINARIAN
+  SUPER_ADMIN
 }
 
-enum UrgencyLevel {
-  LOW
-  MEDIUM
-  HIGH
+enum CitaStatus {
+  PENDIENTE
+  CONFIRMADA
+  COMPLETADA
+  CANCELADA
 }
 
-enum AppointmentStatus {
-  REQUESTED
-  ACCEPTED
-  COMPLETED
-  CANCELLED
+// ============================================
+// MODELOS
+// ============================================
+
+model Usuario {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  nombre    String
+  telefono  String?
+  direccion String?
+  password  String
+  role      UserRole @default(USER)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  veterinario   Veterinario?
+  mascotas      Mascota[]
+  citas         Cita[]
+  calificaciones Calificacion[]
+
+  @@index([email])
+  @@index([role])
 }
 
-model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  passwordHash String
-  role         Role
-  createdAt    DateTime @default(now())
+model Veterinario {
+  id               String  @id @default(cuid())
+  userId           String  @unique
+  cedula           String  @unique
+  numeroColegiado  String
+  tarjetaProfesional String?
+  calificacionPromedio Float @default(0)
 
-  ownerProfile PetOwnerProfile?
-  vetProfile   VetProfile?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  usuario Usuario @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clinicas VetClinica[]
+  citas    Cita[]
+  calificaciones Calificacion[]
+
+  @@index([cedula])
 }
 
-model PetOwnerProfile {
-  id       String  @id @default(uuid())
-  userId   String  @unique
-  user     User    @relation(fields: [userId], references: [id])
-  fullName String
-  phone    String?
-  lat      Float?
-  lng      Float?
+model Clinica {
+  id        String  @id @default(cuid())
+  nombre    String
+  direccion String
+  telefono  String?
+  horario   String? // Ej: "Lun-Vie 8AM-6PM"
 
-  pets     Pet[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  veterinarios VetClinica[]
+
+  @@index([nombre])
 }
 
-model VetProfile {
-  id              String  @id @default(uuid())
-  userId          String  @unique
-  user            User    @relation(fields: [userId], references: [id])
-  fullName        String
-  specialty       String
-  serviceRadiusKm Int     @default(5)
-  avgRating       Float   @default(0)
-  isActive        Boolean @default(true)
+model VetClinica {
+  id       String @id @default(cuid())
+  vetId    String
+  clinicaId String
 
-  appointments    Appointment[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  veterinario Veterinario @relation(fields: [vetId], references: [id], onDelete: Cascade)
+  clinica    Clinica @relation(fields: [clinicaId], references: [id], onDelete: Cascade)
+
+  @@unique([vetId, clinicaId])
+  @@index([vetId])
+  @@index([clinicaId])
 }
 
-model Pet {
-  id             String    @id @default(uuid())
-  ownerProfileId String
-  ownerProfile   PetOwnerProfile @relation(fields: [ownerProfileId], references: [id])
-  name           String
-  species        String
-  breed          String?
-  birthDate      DateTime?
+model Mascota {
+  id        String @id @default(cuid())
+  userId    String
+  nombre    String
+  especie   String // gato, perro, conejo, etc
+  raza      String?
+  edad      Int? // en meses
+  peso      Float? // en kg
 
-  triageSessions TriageSession[]
-  appointments   Appointment[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  usuario Usuario @relation(fields: [userId], references: [id], onDelete: Cascade)
+  historiaMedica HistoriaMedica?
+  citas   Cita[]
+
+  @@index([userId])
+  @@index([especie])
 }
 
-model TriageSession {
-  id           String       @id @default(uuid())
-  petId        String
-  pet          Pet          @relation(fields: [petId], references: [id])
-  messages     Json
-  urgencyLevel UrgencyLevel
-  summary      String?
-  createdAt    DateTime     @default(now())
+model HistoriaMedica {
+  id        String @id @default(cuid())
+  mascotaId String @unique
+  vacunas   String? // JSON o texto con historial de vacunas
+  alergias  String?
+  condiciones String? // condiciones médicas preexistentes
+  notas     String? // notas generales del historial
 
-  appointment  Appointment?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  mascota Mascota @relation(fields: [mascotaId], references: [id], onDelete: Cascade)
+
+  @@index([mascotaId])
 }
 
-model Appointment {
-  id              String            @id @default(uuid())
-  petId           String
-  pet             Pet               @relation(fields: [petId], references: [id])
-  vetProfileId    String
-  vetProfile      VetProfile        @relation(fields: [vetProfileId], references: [id])
-  triageSessionId String?           @unique
-  triageSession   TriageSession?    @relation(fields: [triageSessionId], references: [id])
-  status          AppointmentStatus @default(REQUESTED)
-  scheduledAt     DateTime?
-  ratingStars     Int?
-  ratingComment   String?
-  createdAt       DateTime          @default(now())
+model Cita {
+  id        String @id @default(cuid())
+  usuarioId String
+  vetId     String
+  mascotaId String
+  fecha     DateTime
+  status    CitaStatus @default(PENDIENTE)
+  notas     String? // notas de la cita
+  diagnostico String? // diagnóstico del veterinario
 
-  @@index([vetProfileId])
-  @@index([petId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  veterinario Veterinario @relation(fields: [vetId], references: [id], onDelete: Restrict)
+  mascota Mascota @relation(fields: [mascotaId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId])
+  @@index([vetId])
+  @@index([mascotaId])
+  @@index([fecha])
+  @@index([status])
 }
 
-model spatial_ref_sys {
-  srid      Int     @id
-  auth_name String? @db.VarChar(256)
-  auth_srid Int?
-  srtext    String? @db.VarChar(2048)
-  proj4text String? @db.VarChar(2048)
+model Calificacion {
+  id        String @id @default(cuid())
+  usuarioId String
+  vetId     String
+  puntuacion Int // 1-5
+  comentario String?
+  fecha     DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  veterinario Veterinario @relation(fields: [vetId], references: [id], onDelete: Cascade)
+
+  @@unique([usuarioId, vetId]) // Un usuario solo califica una vez por vet
+  @@index([usuarioId])
+  @@index([vetId])
 }

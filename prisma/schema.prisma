@@ -58,6 +58,12 @@ model Usuario {
   @@index([role])
 }
 
+enum VetEstado {
+  PENDIENTE
+  APROBADO
+  RECHAZADO
+}
+
 model Veterinario {
   id               String  @id @default(cuid())
   userId           String  @unique
@@ -65,6 +71,7 @@ model Veterinario {
   numeroColegiado  String
   tarjetaProfesional String?
   calificacionPromedio Float @default(0)
+  estado           VetEstado @default(PENDIENTE)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

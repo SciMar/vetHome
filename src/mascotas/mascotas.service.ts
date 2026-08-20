@@ -7,8 +7,8 @@ import { UpdateMascotaDto } from './dto/update-mascota.dto';
 export class MascotasService {
   constructor(private prisma: PrismaService) {}
 
-  create(dto: CreateMascotaDto) {
-    return this.prisma.mascota.create({ data: dto });
+    create(data: CreateMascotaDto & { userId: string }) {
+    return this.prisma.mascota.create({ data });
   }
 
   findAll(userId?: string) {

@@ -1,9 +1,6 @@
 import { IsString, IsNotEmpty, IsOptional, IsInt, IsNumber, Min } from 'class-validator';
 
 export class CreateMascotaDto {
-  @IsString()
-  @IsNotEmpty()
-  userId: string;
 
   @IsString()
   @IsNotEmpty()

@@ -65,21 +65,19 @@ enum VetEstado {
 }
 
 model Veterinario {
-  id               String  @id @default(cuid())
-  userId           String  @unique
-  cedula           String  @unique
-  numeroColegiado  String
+  id                 String    @id @default(cuid())
+  userId             String    @unique
+  cedula             String    @unique
   tarjetaProfesional String?
-  calificacionPromedio Float @default(0)
-  estado           VetEstado @default(PENDIENTE)
+  calificacionPromedio Float   @default(0)
+  estado             VetEstado @default(PENDIENTE)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relaciones
-  usuario Usuario @relation(fields: [userId], references: [id], onDelete: Cascade)
-  clinicas VetClinica[]
-  citas    Cita[]
+  usuario        Usuario      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clinicas       VetClinica[]
+  citas          Cita[]
   calificaciones Calificacion[]
 
   @@index([cedula])

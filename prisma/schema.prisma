@@ -88,12 +88,13 @@ model Clinica {
   nombre    String
   direccion String
   telefono  String?
-  horario   String? // Ej: "Lun-Vie 8AM-6PM"
+  horario   String?
+  latitud   Float?
+  longitud  Float?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relaciones
   veterinarios VetClinica[]
 
   @@index([nombre])

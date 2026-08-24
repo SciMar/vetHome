@@ -8,6 +8,7 @@ import { UsersModule } from './users/users.module';
 import { MascotasModule } from './mascotas/mascotas.module';
 import { ClinicasModule } from './clinicas/clinicas.module';
 import { TriageModule } from './triage/triage.module';
+import { CitasModule } from './citas/citas.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { TriageModule } from './triage/triage.module';
     MascotasModule,
     ClinicasModule,
     TriageModule,
+    CitasModule,
   ],
   controllers: [AppController],
   providers: [AppService],

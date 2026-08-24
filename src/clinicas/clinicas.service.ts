@@ -47,4 +47,18 @@ export class ClinicasService {
     await this.findOne(id);
     return this.prisma.clinica.delete({ where: { id } });
   }
+
+  async agregarVet(clinicaId: string, vetId: string) {
+  await this.findOne(clinicaId); // valida que la clínica existe
+  return this.prisma.vetClinica.create({
+    data: { clinicaId, vetId },
+    include: {
+      veterinario: {
+        include: {
+          usuario: { select: { nombre: true, email: true } },
+        },
+      },
+    },
+  });
+}
 }

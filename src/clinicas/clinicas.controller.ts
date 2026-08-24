@@ -40,4 +40,9 @@ export class ClinicasController {
   remove(@Param('id') id: string) {
     return this.clinicasService.remove(id);
   }
+
+  @Post(':id/vets/:vetId')
+agregarVet(@Param('id') clinicaId: string, @Param('vetId') vetId: string) {
+  return this.clinicasService.agregarVet(clinicaId, vetId);
+}
 }

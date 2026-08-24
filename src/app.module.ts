@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { MascotasModule } from './mascotas/mascotas.module';
 import { ClinicasModule } from './clinicas/clinicas.module';
+import { TriageModule } from './triage/triage.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ClinicasModule } from './clinicas/clinicas.module';
     UsersModule,
     MascotasModule,
     ClinicasModule,
+    TriageModule,
   ],
   controllers: [AppController],
   providers: [AppService],

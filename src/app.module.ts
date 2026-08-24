@@ -9,6 +9,7 @@ import { MascotasModule } from './mascotas/mascotas.module';
 import { ClinicasModule } from './clinicas/clinicas.module';
 import { TriageModule } from './triage/triage.module';
 import { CitasModule } from './citas/citas.module';
+import { CalificacionesModule } from './calificaciones/calificaciones.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { CitasModule } from './citas/citas.module';
     ClinicasModule,
     TriageModule,
     CitasModule,
+    CalificacionesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -18,13 +18,26 @@ export class ClinicasService {
   }
 
   async findOne(id: string) {
-    const clinica = await this.prisma.clinica.findUnique({
-      where: { id },
-      include: { veterinarios: { include: { veterinario: { include: { usuario: { select: { nombre: true, email: true } } } } } } },
-    });
-    if (!clinica) throw new NotFoundException(`Clínica con id ${id} no encontrada`);
-    return clinica;
-  }
+  return this.prisma.clinica.findUnique({
+    where: { id },
+    include: {
+      veterinarios: {
+        include: {
+          veterinario: {
+            include: {
+              usuario: {
+                select: {
+                  nombre: true,
+                  email: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+}
 
   async findCercanas(latitud: number, longitud: number, radioKm: number = 5) {
   return this.prisma.$queryRaw`

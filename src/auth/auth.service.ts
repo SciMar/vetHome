@@ -42,10 +42,16 @@ export class AuthService {
 
     const hash = await bcrypt.hash(dto.password, 10);
 
+    const nombreFormateado = dto.nombre
+    .trim()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+
     return this.prisma.usuario.create({
       data: {
-        email: dto.email,
-        nombre: dto.nombre,
+        email: dto.email.toLowerCase().trim(),
+        nombre: nombreFormateado,
         password: hash,
         role: 'VETERINARIAN',
         veterinario: {

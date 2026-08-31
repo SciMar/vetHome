@@ -118,21 +118,20 @@ model VetClinica {
 }
 
 model Mascota {
-  id        String @id @default(cuid())
-  userId    String
-  nombre    String
-  especie   String // gato, perro, conejo, etc
-  raza      String?
-  edad      Int? // en meses
-  peso      Float? // en kg
+  id              String    @id @default(cuid())
+  userId          String
+  nombre          String
+  especie         String
+  raza            String?
+  fechaNacimiento DateTime?
+  peso            Float?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relaciones
-  usuario Usuario @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usuario        Usuario        @relation(fields: [userId], references: [id], onDelete: Cascade)
   historiaMedica HistoriaMedica?
-  citas   Cita[]
+  citas          Cita[]
 
   @@index([userId])
   @@index([especie])

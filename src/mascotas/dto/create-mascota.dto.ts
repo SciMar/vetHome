@@ -1,26 +1,25 @@
-import { IsString, IsNotEmpty, IsOptional, IsInt, IsNumber, Min } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, IsOptional, IsDateString, Min } from 'class-validator';
 
 export class CreateMascotaDto {
 
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'El nombre es obligatorio' })
   nombre: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'La especie es obligatoria' })
   especie: string;
 
   @IsString()
-  @IsOptional()
-  raza?: string;
+  @IsNotEmpty({ message: 'La raza es obligatoria' })
+  raza: string;
 
-  @IsInt()
-  @Min(0)
-  @IsOptional()
-  edad?: number;
+  @IsDateString({}, { message: 'La fecha de nacimiento debe ser una fecha válida' })
+  @IsNotEmpty({ message: 'La fecha de nacimiento es obligatoria' })
+  fechaNacimiento: string;
 
-  @IsNumber()
-  @Min(0)
-  @IsOptional()
-  peso?: number;
+  @IsNumber({}, { message: 'El peso debe ser un número' })
+  @Min(0, { message: 'El peso no puede ser negativo' })
+  @IsNotEmpty({ message: 'El peso es obligatorio' })
+  peso: number;
 }

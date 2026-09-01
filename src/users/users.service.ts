@@ -38,6 +38,14 @@ async findById(id: string) {
       direccion: true,
       role: true,
       createdAt: true,
+      veterinario: {
+        select: {
+          id: true,
+          estado: true,
+          calificacionPromedio: true,
+          tarjetaProfesional: true,
+        },
+      },
     },
   });
   return usuario;

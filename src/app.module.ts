@@ -10,6 +10,7 @@ import { ClinicasModule } from './clinicas/clinicas.module';
 import { TriageModule } from './triage/triage.module';
 import { CitasModule } from './citas/citas.module';
 import { CalificacionesModule } from './calificaciones/calificaciones.module';
+import { HistoriaMedicaModule } from './historia-medica/historia-medica.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { CalificacionesModule } from './calificaciones/calificaciones.module';
     TriageModule,
     CitasModule,
     CalificacionesModule,
+    HistoriaMedicaModule,
   ],
   controllers: [AppController],
   providers: [AppService],

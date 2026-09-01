@@ -12,7 +12,6 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   console.log('🌱 Iniciando seed de VetHome...');
 
-  // Limpiar datos existentes (en orden de dependencias)
   await prisma.calificacion.deleteMany();
   await prisma.cita.deleteMany();
   await prisma.historiaMedica.deleteMany();
@@ -24,440 +23,243 @@ async function main() {
 
   console.log('✓ Base de datos limpiada');
 
-  // ============================================
-  // 1. CREAR USUARIOS (Propietarios)
-  // ============================================
-  const hashedPassword = await bcrypt.hash('Password123!', 10);
+  const hashUser  = await bcrypt.hash('Test1234@', 10);
+  const hashAdmin = await bcrypt.hash('Admin1234@', 10);
+  const hashSeed  = await bcrypt.hash('Password123!', 10);
 
-  const usuario1 = await prisma.usuario.create({
+  // ============================================
+  // 1. USUARIOS DE PRUEBA (test accounts)
+  // ============================================
+  const sofia = await prisma.usuario.create({
     data: {
-      email: 'juan@example.com',
-      nombre: 'Juan Martínez',
-      telefono: '3101234567',
+      email: 'sofia@vethome.com',
+      nombre: 'Sofía Torres',
+      telefono: '3101112233',
       direccion: 'Cra 7 #45-23, Usaquén, Bogotá',
-      password: hashedPassword,
+      password: hashUser,
       role: 'USER',
     },
   });
 
-  const usuario2 = await prisma.usuario.create({
+  const usuarioPedro = await prisma.usuario.create({
     data: {
-      email: 'maria@example.com',
-      nombre: 'María García',
-      telefono: '3157654321',
+      email: 'pedro@vethome.com',
+      nombre: 'Pedro Ramírez',
+      telefono: '3209998877',
       direccion: 'Cll 85 #12-34, Chapinero, Bogotá',
-      password: hashedPassword,
-      role: 'USER',
-    },
-  });
-
-  const usuario3 = await prisma.usuario.create({
-    data: {
-      email: 'carlos@example.com',
-      nombre: 'Carlos López',
-      telefono: '3209876543',
-      direccion: 'Cra 11 #88-50, Teusaquillo, Bogotá',
-      password: hashedPassword,
-      role: 'USER',
-    },
-  });
-
-  console.log('✓ 3 usuarios propietarios creados');
-
-  // ============================================
-  // 2. CREAR VETERINARIOS
-  // ============================================
-  const usuarioVet1 = await prisma.usuario.create({
-    data: {
-      email: 'drlopez@example.com',
-      nombre: 'Dr. Carlos López Veterinario',
-      telefono: '3105551234',
-      direccion: 'Cra 9 #50-15, La Soledad, Bogotá',
-      password: hashedPassword,
+      password: hashUser,
       role: 'VETERINARIAN',
     },
   });
 
-  const veterinario1 = await prisma.veterinario.create({
-    data: {
-      userId: usuarioVet1.id,
-      cedula: '79123456',
-      numeroColegiado: 'MV-12345',
-      tarjetaProfesional: 'TP-2024-001',
-      calificacionPromedio: 4.8,
-    },
-  });
-
-  const usuarioVet2 = await prisma.usuario.create({
-    data: {
-      email: 'drasanchez@example.com',
-      nombre: 'Dra. Patricia Sánchez Veterinaria',
-      telefono: '3128889999',
-      direccion: 'Cll 72 #8-45, Barrios Unidos, Bogotá',
-      password: hashedPassword,
-      role: 'VETERINARIAN',
-    },
-  });
-
-  const veterinario2 = await prisma.veterinario.create({
-    data: {
-      userId: usuarioVet2.id,
-      cedula: '76543210',
-      numeroColegiado: 'MV-12346',
-      tarjetaProfesional: 'TP-2024-002',
-      calificacionPromedio: 4.6,
-    },
-  });
-
-  const usuarioVet3 = await prisma.usuario.create({
-    data: {
-      email: 'drgomez@example.com',
-      nombre: 'Dr. Roberto Gómez Veterinario',
-      telefono: '3114445555',
-      direccion: 'Cra 15 #92-30, Santa Bárbara, Bogotá',
-      password: hashedPassword,
-      role: 'VETERINARIAN',
-    },
-  });
-
-  const veterinario3 = await prisma.veterinario.create({
-    data: {
-      userId: usuarioVet3.id,
-      cedula: '80999888',
-      numeroColegiado: 'MV-12347',
-      tarjetaProfesional: 'TP-2024-003',
-      calificacionPromedio: 4.5,
-    },
-  });
-
-  console.log('✓ 3 veterinarios creados');
-
-  // ============================================
-  // 3. CREAR SUPER ADMIN
-  // ============================================
-  const superAdmin = await prisma.usuario.create({
+  await prisma.usuario.create({
     data: {
       email: 'admin@vethome.com',
       nombre: 'Admin VetHome',
       telefono: '3006789999',
       direccion: 'Cra 5 #27-85, La Candelaria, Bogotá',
-      password: hashedPassword,
+      password: hashAdmin,
       role: 'SUPER_ADMIN',
     },
   });
 
-  console.log('✓ Super admin creado');
+  // Usuarios propietarios adicionales
+  const usuarios = await Promise.all([
+    prisma.usuario.create({ data: { email: 'juan@vethome.com', nombre: 'Juan Martínez', telefono: '3101234567', direccion: 'Cra 7 #45-23, Usaquén', password: hashSeed, role: 'USER' } }),
+    prisma.usuario.create({ data: { email: 'maria@vethome.com', nombre: 'María García', telefono: '3157654321', direccion: 'Cll 85 #12-34, Chapinero', password: hashSeed, role: 'USER' } }),
+    prisma.usuario.create({ data: { email: 'carlos@vethome.com', nombre: 'Carlos López', telefono: '3209876543', direccion: 'Cra 11 #88-50, Teusaquillo', password: hashSeed, role: 'USER' } }),
+    prisma.usuario.create({ data: { email: 'laura@vethome.com', nombre: 'Laura Díaz', telefono: '3184445566', direccion: 'Cll 127 #15-60, Suba', password: hashSeed, role: 'USER' } }),
+    prisma.usuario.create({ data: { email: 'andres@vethome.com', nombre: 'Andrés Vargas', telefono: '3113332244', direccion: 'Cra 80 #38-20, Kennedy', password: hashSeed, role: 'USER' } }),
+  ]);
+
+  console.log('✓ Usuarios creados');
 
   // ============================================
-  // 4. CREAR CLÍNICAS VETERINARIAS
+  // 2. CLÍNICAS CON COORDENADAS EN BOGOTÁ
   // ============================================
-  const clinica1 = await prisma.clinica.create({
-    data: {
-      nombre: 'Clínica Veterinaria Mascotas Felices',
-      direccion: 'Cra 7 #52-30, Usaquén, Bogotá',
-      telefono: '6015551234',
-      horario: 'Lun-Vie 8AM-6PM, Sab 9AM-4PM',
-    },
-  });
+  const clinicasData = [
+    { nombre: 'Clínica Veterinaria Usaquén', direccion: 'Cra 7 #119-45, Usaquén', telefono: '6011110001', horario: 'Lun-Vie 8AM-6PM, Sab 9AM-4PM', latitud: 4.6941, longitud: -74.0294 },
+    { nombre: 'Centro Veterinario Chapinero', direccion: 'Cll 60 #8-35, Chapinero', telefono: '6011110002', horario: 'Lun-Dom 8AM-8PM', latitud: 4.6352, longitud: -74.0665 },
+    { nombre: 'Veterinaria Suba Norte', direccion: 'Cra 91 #145-20, Suba', telefono: '6011110003', horario: 'Lun-Vie 7AM-7PM, Sab 9AM-2PM', latitud: 4.7449, longitud: -74.0996 },
+    { nombre: 'Clínica Mascotas Kennedy', direccion: 'Cll 38A #80-15, Kennedy', telefono: '6011110004', horario: 'Lun-Sab 8AM-7PM', latitud: 4.6287, longitud: -74.1329 },
+    { nombre: 'Veterinaria Teusaquillo', direccion: 'Cra 17 #34-50, Teusaquillo', telefono: '6011110005', horario: 'Lun-Vie 8AM-6PM', latitud: 4.6401, longitud: -74.0842 },
+    { nombre: 'Centro Animal Fontibón', direccion: 'Cll 17 #100-30, Fontibón', telefono: '6011110006', horario: 'Lun-Dom 9AM-7PM', latitud: 4.6721, longitud: -74.1469 },
+    { nombre: 'Clínica Veterinaria Engativá', direccion: 'Cra 72 #74-20, Engativá', telefono: '6011110007', horario: 'Lun-Sab 8AM-6PM', latitud: 4.7044, longitud: -74.1133 },
+    { nombre: 'Veterinaria Barrios Unidos', direccion: 'Cra 24 #57-45, Barrios Unidos', telefono: '6011110008', horario: 'Lun-Vie 7AM-6PM, Sab 8AM-2PM', latitud: 4.6601, longitud: -74.0797 },
+    { nombre: 'Centro Veterinario Bosa', direccion: 'Cll 65B Sur #78-40, Bosa', telefono: '6011110009', horario: 'Lun-Dom 8AM-7PM', latitud: 4.6200, longitud: -74.1850 },
+    { nombre: 'Clínica Animal Santa Fe', direccion: 'Cra 5 #12-30, Santa Fe', telefono: '6011110010', horario: 'Lun-Sab 9AM-6PM', latitud: 4.5981, longitud: -74.0742 },
+  ];
 
-  const clinica2 = await prisma.clinica.create({
-    data: {
-      nombre: 'Centro Veterinario La Sabana',
-      direccion: 'Cll 85 #15-40, Chapinero, Bogotá',
-      telefono: '6015559876',
-      horario: 'Lun-Dom 8AM-8PM',
-    },
-  });
+  const clinicas = await Promise.all(
+    clinicasData.map(data => prisma.clinica.create({ data }))
+  );
 
-  const clinica3 = await prisma.clinica.create({
-    data: {
-      nombre: 'Veterinaria Teusaquillo Pet',
-      direccion: 'Cra 11 #88-55, Teusaquillo, Bogotá',
-      telefono: '6015556789',
-      horario: 'Lun-Vie 7AM-7PM, Sab 9AM-2PM',
-    },
-  });
-
-  console.log('✓ 3 clínicas creadas');
+  console.log('✓ 10 clínicas creadas');
 
   // ============================================
-  // 5. ASOCIAR VETERINARIOS CON CLÍNICAS (N:M)
+  // 3. VETERINARIOS (Pedro de prueba + 14 más)
   // ============================================
-  await prisma.vetClinica.create({
-    data: { vetId: veterinario1.id, clinicaId: clinica1.id },
-  });
-
-  await prisma.vetClinica.create({
-    data: { vetId: veterinario1.id, clinicaId: clinica2.id },
-  });
-
-  await prisma.vetClinica.create({
-    data: { vetId: veterinario2.id, clinicaId: clinica2.id },
-  });
-
-  await prisma.vetClinica.create({
-    data: { vetId: veterinario2.id, clinicaId: clinica3.id },
-  });
-
-  await prisma.vetClinica.create({
-    data: { vetId: veterinario3.id, clinicaId: clinica1.id },
-  });
-
-  console.log('✓ Veterinarios asociados con clínicas');
-
-  // ============================================
-  // 6. CREAR MASCOTAS
-  // ============================================
-  const mascota1 = await prisma.mascota.create({
+  const pedro = await prisma.veterinario.create({
     data: {
-      userId: usuario1.id,
-      nombre: 'Luna',
-      especie: 'Gato',
-      raza: 'Persa',
-      edad: 36, // 3 años en meses
-      peso: 4.5,
+      userId: usuarioPedro.id,
+      cedula: '80111222',
+      tarjetaProfesional: 'TP-2024-000',
+      estado: 'APROBADO',
+      calificacionPromedio: 4.9,
     },
   });
 
-  const mascota2 = await prisma.mascota.create({
-    data: {
-      userId: usuario1.id,
-      nombre: 'Max',
-      especie: 'Perro',
-      raza: 'Golden Retriever',
-      edad: 60, // 5 años
-      peso: 32.0,
-    },
-  });
+  const vetsData = [
+    { nombre: 'Dra. Ana Morales',      email: 'ana.morales@vethome.com',      cedula: '79100001', tp: 'TP-2024-001', calif: 4.8 },
+    { nombre: 'Dr. Luis Herrera',      email: 'luis.herrera@vethome.com',     cedula: '79100002', tp: 'TP-2024-002', calif: 4.7 },
+    { nombre: 'Dra. Claudia Peña',     email: 'claudia.pena@vethome.com',     cedula: '79100003', tp: 'TP-2024-003', calif: 4.6 },
+    { nombre: 'Dr. Sergio Castro',     email: 'sergio.castro@vethome.com',    cedula: '79100004', tp: 'TP-2024-004', calif: 4.5 },
+    { nombre: 'Dra. Natalia Ríos',     email: 'natalia.rios@vethome.com',     cedula: '79100005', tp: 'TP-2024-005', calif: 4.9 },
+    { nombre: 'Dr. Camilo Ruiz',       email: 'camilo.ruiz@vethome.com',      cedula: '79100006', tp: 'TP-2024-006', calif: 4.3 },
+    { nombre: 'Dra. Valentina Cruz',   email: 'valentina.cruz@vethome.com',   cedula: '79100007', tp: 'TP-2024-007', calif: 4.7 },
+    { nombre: 'Dr. Felipe Medina',     email: 'felipe.medina@vethome.com',    cedula: '79100008', tp: 'TP-2024-008', calif: 4.4 },
+    { nombre: 'Dra. Sandra Vargas',    email: 'sandra.vargas@vethome.com',    cedula: '79100009', tp: 'TP-2024-009', calif: 4.8 },
+    { nombre: 'Dr. Julián Torres',     email: 'julian.torres@vethome.com',    cedula: '79100010', tp: 'TP-2024-010', calif: 4.6 },
+    { nombre: 'Dra. Paola Jiménez',    email: 'paola.jimenez@vethome.com',    cedula: '79100011', tp: 'TP-2024-011', calif: 4.5 },
+    { nombre: 'Dr. Andrés Ospina',     email: 'andres.ospina@vethome.com',    cedula: '79100012', tp: 'TP-2024-012', calif: 4.7 },
+    { nombre: 'Dra. Carolina Suárez',  email: 'carolina.suarez@vethome.com',  cedula: '79100013', tp: 'TP-2024-013', calif: 4.3 },
+    { nombre: 'Dr. Mauricio Salcedo',  email: 'mauricio.salcedo@vethome.com', cedula: '79100014', tp: 'TP-2024-014', calif: 4.9 },
+  ];
 
-  const mascota3 = await prisma.mascota.create({
-    data: {
-      userId: usuario2.id,
-      nombre: 'Miau',
-      especie: 'Gato',
-      raza: 'Siamés',
-      edad: 24, // 2 años
-      peso: 3.2,
-    },
-  });
+  const vets: any[] = [pedro];
 
-  const mascota4 = await prisma.mascota.create({
-    data: {
-      userId: usuario3.id,
-      nombre: 'Rocky',
-      especie: 'Perro',
-      raza: 'Pastor Alemán',
-      edad: 48, // 4 años
-      peso: 28.5,
-    },
-  });
+  for (const v of vetsData) {
+    const usuario = await prisma.usuario.create({
+      data: {
+        email: v.email,
+        nombre: v.nombre,
+        telefono: `31${Math.floor(10000000 + Math.random() * 89999999)}`,
+        password: hashSeed,
+        role: 'VETERINARIAN',
+      },
+    });
+    const vet = await prisma.veterinario.create({
+      data: {
+        userId: usuario.id,
+        cedula: v.cedula,
+        tarjetaProfesional: v.tp,
+        estado: 'APROBADO',
+        calificacionPromedio: v.calif,
+      },
+    });
+    vets.push(vet);
+  }
 
-  const mascota5 = await prisma.mascota.create({
-    data: {
-      userId: usuario2.id,
-      nombre: 'Fluffy',
-      especie: 'Conejo',
-      raza: 'Holland Lop',
-      edad: 18, // 1.5 años
-      peso: 2.1,
-    },
-  });
-
-  console.log('✓ 5 mascotas creadas');
+  console.log('✓ 15 veterinarios creados');
 
   // ============================================
-  // 7. CREAR HISTORIAS MÉDICAS
+  // 4. ASOCIACIONES VET-CLÍNICA
+  // Cada clínica tiene entre 3 y 5 vets
+  // Varios vets están en múltiples clínicas
   // ============================================
-  await prisma.historiaMedica.create({
-    data: {
-      mascotaId: mascota1.id,
-      vacunas: 'Vacuna trivalente (2024-01), Rabia (2024-01)',
-      alergias: 'Alérgica a pollo',
-      condiciones: 'Ninguna',
-      notas: 'Gato sano, buena condición física. Requiere dieta especial sin pollo.',
-    },
-  });
+  const asociaciones = [
+    // Pedro en 3 clínicas
+    { vetIdx: 0, clinIdx: 0 },
+    { vetIdx: 0, clinIdx: 1 },
+    { vetIdx: 0, clinIdx: 4 },
+    // Vet 1
+    { vetIdx: 1, clinIdx: 0 },
+    { vetIdx: 1, clinIdx: 2 },
+    // Vet 2
+    { vetIdx: 2, clinIdx: 1 },
+    { vetIdx: 2, clinIdx: 3 },
+    { vetIdx: 2, clinIdx: 7 },
+    // Vet 3
+    { vetIdx: 3, clinIdx: 2 },
+    { vetIdx: 3, clinIdx: 6 },
+    // Vet 4
+    { vetIdx: 4, clinIdx: 0 },
+    { vetIdx: 4, clinIdx: 3 },
+    { vetIdx: 4, clinIdx: 9 },
+    // Vet 5
+    { vetIdx: 5, clinIdx: 4 },
+    { vetIdx: 5, clinIdx: 5 },
+    // Vet 6
+    { vetIdx: 6, clinIdx: 1 },
+    { vetIdx: 6, clinIdx: 6 },
+    { vetIdx: 6, clinIdx: 8 },
+    // Vet 7
+    { vetIdx: 7, clinIdx: 3 },
+    { vetIdx: 7, clinIdx: 7 },
+    // Vet 8
+    { vetIdx: 8, clinIdx: 2 },
+    { vetIdx: 8, clinIdx: 5 },
+    { vetIdx: 8, clinIdx: 9 },
+    // Vet 9
+    { vetIdx: 9, clinIdx: 4 },
+    { vetIdx: 9, clinIdx: 8 },
+    // Vet 10
+    { vetIdx: 10, clinIdx: 0 },
+    { vetIdx: 10, clinIdx: 6 },
+    // Vet 11
+    { vetIdx: 11, clinIdx: 1 },
+    { vetIdx: 11, clinIdx: 5 },
+    { vetIdx: 11, clinIdx: 9 },
+    // Vet 12
+    { vetIdx: 12, clinIdx: 3 },
+    { vetIdx: 12, clinIdx: 7 },
+    // Vet 13
+    { vetIdx: 13, clinIdx: 2 },
+    { vetIdx: 13, clinIdx: 8 },
+    // Vet 14
+    { vetIdx: 14, clinIdx: 4 },
+    { vetIdx: 14, clinIdx: 6 },
+    { vetIdx: 14, clinIdx: 9 },
+  ];
 
-  await prisma.historiaMedica.create({
-    data: {
-      mascotaId: mascota2.id,
-      vacunas: 'Vacuna polivalente (2023-11), Rabia (2023-11)',
-      alergias: 'Ninguna',
-      condiciones: 'Displasia leve de cadera',
-      notas: 'Perro activo. Control anual recomendado para displasia.',
-    },
-  });
+  for (const a of asociaciones) {
+    await prisma.vetClinica.create({
+      data: { vetId: vets[a.vetIdx].id, clinicaId: clinicas[a.clinIdx].id },
+    });
+  }
 
-  await prisma.historiaMedica.create({
-    data: {
-      mascotaId: mascota3.id,
-      vacunas: 'Vacuna trivalente (2024-02), Rabia (2024-02)',
-      alergias: 'Sensible a antibióticos tipo penicilina',
-      condiciones: 'Ninguna',
-      notas: 'Gato de raza, requiere revisiones cada 6 meses.',
-    },
-  });
-
-  await prisma.historiaMedica.create({
-    data: {
-      mascotaId: mascota4.id,
-      vacunas: 'Vacuna polivalente (2023-10), Rabia (2023-10)',
-      alergias: 'Ninguna',
-      condiciones: 'Ninguna',
-      notas: 'Perro de trabajo, excelente estado de salud.',
-    },
-  });
-
-  await prisma.historiaMedica.create({
-    data: {
-      mascotaId: mascota5.id,
-      vacunas: 'Ninguna registrada',
-      alergias: 'Sensible a alimentos con colorantes',
-      condiciones: 'Ninguna',
-      notas: 'Conejo pequeño, requiere dieta de fibra. Esterilizado.',
-    },
-  });
-
-  console.log('✓ 5 historias médicas creadas');
-
-  // ============================================
-  // 8. CREAR CITAS
-  // ============================================
-  const cita1 = await prisma.cita.create({
-    data: {
-      usuarioId: usuario1.id,
-      vetId: veterinario1.id,
-      mascotaId: mascota1.id,
-      fecha: new Date('2024-08-10T10:00:00'),
-      status: 'COMPLETADA',
-      notas: 'Revisión rutinaria de gato. Se recomendó cambio de alimento.',
-      diagnostico: 'Gato sano, ligero sobrepeso (4.5 kg). Recomendar actividad física.',
-    },
-  });
-
-  const cita2 = await prisma.cita.create({
-    data: {
-      usuarioId: usuario1.id,
-      vetId: veterinario3.id,
-      mascotaId: mascota2.id,
-      fecha: new Date('2024-08-15T14:30:00'),
-      status: 'COMPLETADA',
-      notas: 'Revisión de displasia. Se prescribió suplemento para articulaciones.',
-      diagnostico: 'Displasia estable. Continuar con ejercicio moderado.',
-    },
-  });
-
-  const cita3 = await prisma.cita.create({
-    data: {
-      usuarioId: usuario2.id,
-      vetId: veterinario2.id,
-      mascotaId: mascota3.id,
-      fecha: new Date('2024-08-20T09:00:00'),
-      status: 'CONFIRMADA',
-      notas: 'Cita de vacunación anual.',
-      diagnostico: null,
-    },
-  });
-
-  const cita4 = await prisma.cita.create({
-    data: {
-      usuarioId: usuario3.id,
-      vetId: veterinario1.id,
-      mascotaId: mascota4.id,
-      fecha: new Date('2024-08-25T16:00:00'),
-      status: 'PENDIENTE',
-      notas: 'Revisión general canina.',
-      diagnostico: null,
-    },
-  });
-
-  const cita5 = await prisma.cita.create({
-    data: {
-      usuarioId: usuario2.id,
-      vetId: veterinario2.id,
-      mascotaId: mascota5.id,
-      fecha: new Date('2024-09-01T11:00:00'),
-      status: 'PENDIENTE',
-      notas: 'Revisión de conejo. Control post-esterilización.',
-      diagnostico: null,
-    },
-  });
-
-  console.log('✓ 5 citas creadas');
+  console.log('✓ Veterinarios asociados a clínicas');
 
   // ============================================
-  // 9. CREAR CALIFICACIONES
+  // 5. MASCOTAS (usan fechaNacimiento)
   // ============================================
-  await prisma.calificacion.create({
-    data: {
-      usuarioId: usuario1.id,
-      vetId: veterinario1.id,
-      puntuacion: 5,
-      comentario:
-        'Excelente atención. Dr. López fue muy atento con Luna. Altamente recomendado.',
-      fecha: new Date('2024-08-11'),
-    },
-  });
+  const mascota1 = await prisma.mascota.create({ data: { userId: sofia.id,       nombre: 'Luna',   especie: 'Gato',   raza: 'Persa',           fechaNacimiento: new Date('2021-03-15'), peso: 4.5 } });
+  const mascota2 = await prisma.mascota.create({ data: { userId: sofia.id,       nombre: 'Max',    especie: 'Perro',  raza: 'Golden Retriever', fechaNacimiento: new Date('2019-07-20'), peso: 32.0 } });
+  const mascota3 = await prisma.mascota.create({ data: { userId: usuarios[0].id, nombre: 'Miau',   especie: 'Gato',   raza: 'Siamés',          fechaNacimiento: new Date('2022-01-10'), peso: 3.2 } });
+  const mascota4 = await prisma.mascota.create({ data: { userId: usuarios[1].id, nombre: 'Rocky',  especie: 'Perro',  raza: 'Pastor Alemán',   fechaNacimiento: new Date('2020-05-05'), peso: 28.5 } });
+  const mascota5 = await prisma.mascota.create({ data: { userId: usuarios[2].id, nombre: 'Fluffy', especie: 'Conejo', raza: 'Holland Lop',     fechaNacimiento: new Date('2023-02-28'), peso: 2.1 } });
 
-  await prisma.calificacion.create({
-    data: {
-      usuarioId: usuario1.id,
-      vetId: veterinario3.id,
-      puntuacion: 4,
-      comentario:
-        'Buen diagnóstico. Muy profesional, aunque un poco rápido en la consulta.',
-      fecha: new Date('2024-08-16'),
-    },
-  });
+  console.log('✓ Mascotas creadas');
 
-  await prisma.calificacion.create({
-    data: {
-      usuarioId: usuario2.id,
-      vetId: veterinario2.id,
-      puntuacion: 5,
-      comentario:
-        'Dra. Sánchez es increíble. Miau se siente muy cómoda con ella. Volveré sin duda.',
-      fecha: new Date('2024-08-21'),
-    },
-  });
+  // ============================================
+  // 6. CITAS
+  // ============================================
+  await prisma.cita.create({ data: { usuarioId: sofia.id, vetId: pedro.id, mascotaId: mascota1.id, fecha: new Date('2026-09-10T10:00:00'), status: 'PENDIENTE', notas: 'Revisión general de Luna.' } });
+  await prisma.cita.create({ data: { usuarioId: sofia.id, vetId: vets[1].id, mascotaId: mascota2.id, fecha: new Date('2026-08-15T14:30:00'), status: 'COMPLETADA', notas: 'Control de displasia.', diagnostico: 'Displasia estable. Continuar ejercicio moderado.' } });
+  await prisma.cita.create({ data: { usuarioId: usuarios[0].id, vetId: vets[2].id, mascotaId: mascota3.id, fecha: new Date('2026-09-20T09:00:00'), status: 'CONFIRMADA', notas: 'Vacunación anual.' } });
+  await prisma.cita.create({ data: { usuarioId: usuarios[1].id, vetId: pedro.id, mascotaId: mascota4.id, fecha: new Date('2026-09-25T16:00:00'), status: 'PENDIENTE', notas: 'Revisión general.' } });
 
-  await prisma.calificacion.create({
-    data: {
-      usuarioId: usuario3.id,
-      vetId: veterinario1.id,
-      puntuacion: 4,
-      comentario:
-        'Buena atención al perro. Podría mejorar en explicar el tratamiento.',
-      fecha: new Date('2024-08-26'),
-    },
-  });
+  console.log('✓ Citas creadas');
 
-  console.log('✓ 4 calificaciones creadas');
+  // ============================================
+  // 7. CALIFICACIONES
+  // ============================================
+  await prisma.calificacion.create({ data: { usuarioId: sofia.id, vetId: vets[1].id, puntuacion: 5, comentario: 'Excelente atención con Max.', fecha: new Date('2026-08-16') } });
+  await prisma.calificacion.create({ data: { usuarioId: usuarios[0].id, vetId: vets[2].id, puntuacion: 4, comentario: 'Muy profesional con Miau.', fecha: new Date('2026-08-22') } });
+
+  console.log('✓ Calificaciones creadas');
 
   console.log('');
   console.log('====================================');
   console.log('✅ Seed completado exitosamente!');
   console.log('====================================');
-  console.log('');
-  console.log('📊 Datos creados:');
-  console.log('   • 3 Usuarios propietarios');
-  console.log('   • 3 Veterinarios');
-  console.log('   • 1 Super Admin');
-  console.log('   • 3 Clínicas');
-  console.log('   • 5 Mascotas');
-  console.log('   • 5 Historias médicas');
-  console.log('   • 5 Citas');
-  console.log('   • 4 Calificaciones');
-  console.log('');
-  console.log('🔐 Contraseña para todos los usuarios: Password123!');
-  console.log('');
+  console.log('🔐 Cuentas de prueba:');
+  console.log('   sofia@vethome.com   / Test1234@  → USER');
+  console.log('   pedro@vethome.com   / Test1234@  → VETERINARIAN');
+  console.log('   admin@vethome.com   / Admin1234@ → SUPER_ADMIN');
+  console.log('📊 10 clínicas · 15 vets · 5 mascotas · 4 citas');
 }
 
 main()
-  .catch((e) => {
-    console.error('❌ Error en seed:', e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+  .catch((e) => { console.error('❌ Error en seed:', e); process.exit(1); })
+  .finally(async () => { await prisma.$disconnect(); });

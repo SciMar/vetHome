@@ -1,9 +1,11 @@
-import { Body, Controller, Post, HttpCode } from '@nestjs/common';
+import { Body, Controller, Post, Get, HttpCode, UseGuards } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { RegisterVetDto } from './dto/register-vet.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthService } from './auth.service';
+import { JwtAuthGuard } from './jwt-auth.guard';
+import { GetUser } from './get-user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -26,5 +28,11 @@ export class AuthController {
   @Post('register/vet')
   registerVet(@Body() dto: RegisterVetDto) {
     return this.authService.registerVet(dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  getMe(@GetUser('id') usuarioId: string) {
+    return this.usersService.findById(usuarioId);
   }
 }
